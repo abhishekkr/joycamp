@@ -5,21 +5,18 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/abhishekkr/gol/golbin"
+	proc "github.com/abhishekkr/joycamp/proc"
 )
 
 var (
 	Cmd = flag.String("cmd", "", "command to be run provided directly")
 )
 
-type Proc struct {
-	Command string
-}
-
 func main() {
 	flag.Parse()
 	fmt.Println("joycamp~", *Cmd)
-	out, err := golbin.Exec(*Cmd)
-	log.Println(out)
-	log.Println(err)
+	p := proc.Proc{Cmd: *Cmd}
+	if err := p.Run(); err != nil {
+		log.Println(err)
+	}
 }
