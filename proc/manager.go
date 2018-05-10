@@ -1,6 +1,9 @@
 package proc
 
 import (
+	"encoding/json"
+	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,11 +17,21 @@ import (
 
 var (
 	CmdDir = golenv.OverrideIfEnv("JOYCAMP_CMD_DIR", "/tmp")
+
+	Cfg  = flag.String("cfg", "", "json config to map all")
+	Cmd  = flag.String("cmd", "", "command to be run provided directly")
+	Src  = flag.String("src", "", "source to fetch command")
+	Args = flag.String("args", "", "args to be passed to command")
+	Env  = flag.String("env", "{\"mypath\": \"/tmp\", \"yourpath\": \"/mnt\" }", "env to be set for command")
 )
 
+type EnvMap map[string]string
+
 type Proc struct {
-	Cmd string
-	Src string
+	Cmd    string
+	Src    string
+	Args   string
+	EnvMap EnvMap
 }
 
 func init() {
@@ -47,7 +60,45 @@ func (p *Proc) Run() (err error) {
 			return
 		}
 	}
-	out, err := golbin.Exec(p.Cmd)
+	out, err := golbin.ExecWithEnv(fmt.Sprintf("%s %s", p.Cmd, p.Args), p.EnvMap)
 	log.Println(out)
 	return err
+}
+
+func cfgManager() *Proc {
+	cfgBytes, err := ioutil.ReadFile(*Cfg)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println("joycamp~", string(cfgBytes))
+
+	var proc Proc
+	if err = json.Unmarshal(cfgBytes, &proc); err != nil {
+		log.Fatalln("corrupted cfg value")
+	}
+	return &proc
+}
+
+func argManager() *Proc {
+	fmt.Println("joycamp~", *Cmd)
+
+	var env EnvMap
+	if err := json.Unmarshal([]byte(*Env), &env); err != nil {
+		log.Fatalln("corrupted env value")
+	}
+
+	return &Proc{
+		Cmd:    *Cmd,
+		Src:    *Src,
+		Args:   *Args,
+		EnvMap: env,
+	}
+}
+
+func Manager() *Proc {
+	flag.Parse()
+	if *Cfg == "" {
+		return argManager()
+	}
+	return cfgManager()
 }
