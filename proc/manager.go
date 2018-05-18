@@ -12,6 +12,7 @@ import (
 	"github.com/abhishekkr/gol/golbin"
 	"github.com/abhishekkr/gol/golcrypt"
 	"github.com/abhishekkr/gol/golenv"
+	"github.com/abhishekkr/gol/golerror"
 	"github.com/abhishekkr/gol/golhttpclient"
 )
 
@@ -55,13 +56,16 @@ func downloadCmd(src string) (cmdPath string, err error) {
 
 func (p *Proc) Run() (err error) {
 	if p.Cmd == "" {
+		if p.Src == "" {
+			return golerror.Error(127, "no cmd or src provided to get proc def")
+		}
 		p.Cmd, err = downloadCmd(p.Src)
 		if err != nil {
 			return
 		}
 	}
 	out, err := golbin.ExecWithEnv(fmt.Sprintf("%s %s", p.Cmd, p.Args), p.EnvMap)
-	log.Println(out)
+	fmt.Println(out)
 	return err
 }
 
@@ -70,7 +74,7 @@ func cfgManager() *Proc {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("joycamp~", string(cfgBytes))
+	log.Println("joycamp~", string(cfgBytes))
 
 	var proc Proc
 	if err = json.Unmarshal(cfgBytes, &proc); err != nil {

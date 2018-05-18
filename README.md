@@ -1,3 +1,4 @@
+
 ## joycamp
 
 ```
@@ -10,9 +11,9 @@
 
 ```
 
-> reference: `1982`, forced labour camp
+> reference: `1984`, forced labour camp
 
-this is joycamp where `thinkpol` get the work done
+this is joycamp where [thinkpol](https://github.com/abhishekkr/thinkpol) get the work done
 
 [usages](./docs/usage.md)
 
@@ -21,6 +22,4 @@ this is joycamp where `thinkpol` get the work done
 for dependency management can use [golang's dep](#) or [go-tasks](./go-tasks)
 
 ---
-
-
 
